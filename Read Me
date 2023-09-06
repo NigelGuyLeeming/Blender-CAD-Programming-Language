@@ -1,0 +1,82 @@
+A scripting language for use in Blender to create 3D models similar to OPENSCAD, but based on Blender's Python.
+
+How it works
+------------
+
+A file is referenced using Blender scripting which contains all of the functions to render models using a greatly simplified language. Any of Blender's python instructions can also be used.
+
+Example: This is the CAD file
+
+# standard blender boilerplate
+import bpy
+import sys
+import os
+
+# blender python filepaths are a bit crap. This routine ensures the Blender CAD Programming Language can be found in the same folder as this script
+def init():
+    dir = os.path.dirname(bpy.data.filepath)
+    print(bpy.data.filepath)
+    if not dir in sys.path:
+        sys.path.append(dir)
+    return
+
+# call the above routine
+init()
+
+# this ensures the file is up to date while still working on it
+import blender_cad_programming_language
+import imp
+imp.reload(blender_cad_programming_language)
+from blender_cad_programming_language import *
+
+# a call to blender_cad_programming_language to clear the scene
+clear()
+
+# a call to blender_cad_programming_language to add a cube size (1,1,1) at location (0,0,0), the standard blender cube
+cube=addCube(1,1,1,0,0,0)
+# add a sphere
+sphere=addSphere([1,1,1],[1.4,0,0])
+# cut the cube with the sphere
+difference(cube,sphere)
+
+End of example 1.
+
+In the blender_cad_programming_language file referenced, is a routine to add the cube and return it as an object which can then be further manipulated or animated
+...
+def addCube(p1,p2,p3=None, p4=None, p5=None, p6=None):
+    """Adds a cube to the scene
+
+    Adds a cube to the scene with location and scale(size)
+
+    Args:
+        p1: either number representing x size or tuple size [x,y,z]
+        p2: either number representing y size or tuple location [x,y,z]
+        p3: number representing z size
+        p4: number representing x location to centre of cube
+        p5: number representing y location
+        p6: number representing z location
+    Returns:
+        cube object
+
+    Raises:
+    """
+    size=[1,1,1]
+    location=[0,0,0]
+    if type(p1) in (tuple, list):
+        size=p1
+    else:
+        size[0]=p1
+        size[1]=p2
+        size[2]=p3
+    if type(p2) in (tuple, list):
+        location=p2
+    else:
+        location[0]=p4
+        location[1]=p5
+        location[2]=p6
+    bpy.ops.mesh.primitive_cube_add(scale=size,location=location) 
+    return bpy.context.object
+...
+
+blender_cad_programming_language will contain definitions to add basic shapes, manipulate them with simple boolean functions (difference, union, intersection)
+with the aim of using blender to create cad models using code.
